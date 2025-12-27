@@ -1,0 +1,101 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <RelativeLayout
+        android:id="@+id/SeccionBarraSuperior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/BotonRegresar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="?attr/actionModeCloseDrawable"
+            app:tint="#1ABC9C"  />
+
+        <TextView
+            android:id="@+id/TextoTituloFormulario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_toEndOf="@id/BotonRegresar"
+            android:text="Nuevo Movimiento"
+            android:textColor="#2C3E50"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ECF0F1"
+        android:layout_marginBottom="24dp"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Monto (Bs.)"
+        android:textColor="#7F8C8D"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/EntradaMonto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#1ABC9C"
+        android:hint="0.00"
+        android:inputType="numberDecimal"
+        android:textColor="@color/black"
+        android:textColorHint="#A9A9A9"
+        android:textSize="28sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Referencia o Concepto"
+        android:textColor="#7F8C8D"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/EntradaReferencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#1ABC9C"
+        android:hint="Ej. Ahorro semanal"
+        android:inputType="textCapSentences"
+        android:textColor="@color/black"
+        android:textColorHint="#A9A9A9" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/BotonConfirmarMovimiento"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="#1ABC9C"
+        android:text="Guardar Movimiento"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

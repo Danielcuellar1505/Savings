@@ -1,0 +1,145 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ContenedorPrincipal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:id="@+id/SeccionEncabezado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/TextoSaludoUsuario"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hola Carlos"
+            android:textColor="#2C3E50"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/BotonNotificaciones"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_notification"/>
+
+        <ImageButton
+            android:id="@+id/BotonAjustes"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/TarjetaSaldo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#F1F9F8"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Ahorro Disponible"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.1"
+                    android:textSize="12sp"
+                    android:textColor="#16A085"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/BotonOcultarSaldo"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_visibility_off" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/TextoMontoDinero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Bs. 0,00"
+                android:textColor="#2C3E50"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/SeccionBotonesAccion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/BotonAgregarDinero"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Agregar"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:backgroundTint="#1ABC9C"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="12dp" />
+
+        <Button
+            android:id="@+id/BotonRetirarDinero"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Retirar"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:backgroundTint="#E74C3C"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/BotonVerExtracto"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Ver Extracto de Movimientos"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textColor="#1ABC9C"
+        app:strokeColor="#1ABC9C"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>
