@@ -1,6 +1,7 @@
 package com.example.savings;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -23,6 +25,7 @@ public class PantallaPrincipal extends AppCompatActivity {
     private TextView TextoMontoDinero;
     private ImageButton BotonOcultarSaldo;
     private ImageButton BotonNotificaciones;
+    private ImageButton BotonAjustes;
     private Button BotonAgregarDinero;
     private Button BotonRetirarDinero;
     private Button BotonVerExtracto;
@@ -80,6 +83,7 @@ public class PantallaPrincipal extends AppCompatActivity {
         BotonRetirarDinero = findViewById(R.id.BotonRetirarDinero);
         BotonVerExtracto = findViewById(R.id.BotonVerExtracto);
         PuntoRojoIndicador = findViewById(R.id.PuntoRojoIndicador);
+        BotonAjustes = findViewById(R.id.BotonAjustes);
 
         BotonOcultarSaldo.setOnClickListener(Vista -> {
             SaldoVisible = !SaldoVisible;
@@ -111,6 +115,10 @@ public class PantallaPrincipal extends AppCompatActivity {
             IrANotificaciones.putExtra("LISTA_NOTIFICACIONES", HistorialNotificaciones);
             startActivity(IrANotificaciones);
         });
+
+        BotonAjustes.setOnClickListener(v -> {
+            startActivity(new Intent(this, AjustesActivity.class));
+        });
     }
     private void ActualizarTextoSaldo() {
         if (SaldoVisible) {
@@ -119,4 +127,30 @@ public class PantallaPrincipal extends AppCompatActivity {
             TextoMontoDinero.setText("****");
         }
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActualizarSaludoPersonalizado();
+    }
+
+    private void ActualizarSaludoPersonalizado() {
+        SharedPreferences Preferencias = getSharedPreferences("DatosUsuario", MODE_PRIVATE);
+        String Nombre = Preferencias.getString("Nombre", "");
+
+        TextView TextoSaludoUsuario = findViewById(R.id.TextoSaludoUsuario);
+
+        Calendar Cal = Calendar.getInstance();
+        int Hora = Cal.get(Calendar.HOUR_OF_DAY);
+        String MomentoDia;
+
+        if (Hora >= 6 && Hora < 12) MomentoDia = "Buenos días";
+        else if (Hora >= 12 && Hora < 19) MomentoDia = "Buenas tardes";
+        else MomentoDia = "Buenas noches";
+
+        if (Nombre.isEmpty()) {
+            TextoSaludoUsuario.setText("¡Bienvenid@!");
+        } else {
+            TextoSaludoUsuario.setText(MomentoDia + ", " + Nombre);
+        }
+    };
 }

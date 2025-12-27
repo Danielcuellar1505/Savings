@@ -1,0 +1,68 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="20dp"
+        android:src="@android:drawable/ic_lock_idle_lock"
+        app:tint="#1ABC9C" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Seguridad de la App"
+        android:textColor="#2C3E50"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Cree un PIN de 4 dígitos para proteger sus ahorros."
+        android:textColor="#7F8C8D"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/EntradaNuevoPin"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:backgroundTint="#1ABC9C"
+        android:hint="0000"
+        android:inputType="numberPassword"
+        android:letterSpacing="0.5"
+        android:maxLength="4"
+        android:padding="16dp"
+        android:textAlignment="center"
+        android:textColor="#2C3E50"
+        android:textSize="32sp"
+        android:textStyle="bold" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/BotonGuardarPin"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="#1ABC9C"
+        android:text="Activar PIN de Seguridad"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textColor="#ffffff"
+        android:textStyle="bold"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>
