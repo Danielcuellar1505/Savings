@@ -13,18 +13,25 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 public class PantallaPrincipal extends AppCompatActivity {
 
     private TextView TextoMontoDinero;
     private ImageButton BotonOcultarSaldo;
+    private ImageButton BotonNotificaciones;
     private Button BotonAgregarDinero;
     private Button BotonRetirarDinero;
     private Button BotonVerExtracto;
     private boolean SaldoVisible = true;
     private double SaldoActual = 0.00;
-    private java.util.ArrayList<MovimientoModelo> HistorialMovimientos = new java.util.ArrayList<>();
+    private View PuntoRojoIndicador;
+
+    private ArrayList<MovimientoModelo> HistorialMovimientos = new ArrayList<>();
+    private ArrayList<NotificacionModelo> HistorialNotificaciones = new ArrayList<>();
 
     private final ActivityResultLauncher<Intent> LanzadorFormulario = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -40,22 +47,39 @@ public class PantallaPrincipal extends AppCompatActivity {
                     }
                     HistorialMovimientos.add(0, new MovimientoModelo(Tipo, Concepto, MontoRecibido, SaldoActual));
 
+                    String FechaHora = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+                    String MensajeNotificacion = Tipo + " de " + MontoRecibido + " Bs. en fecha " + FechaHora;
+                    HistorialNotificaciones.add(0, new NotificacionModelo(MensajeNotificacion, System.currentTimeMillis()));
+                    PuntoRojoIndicador.setVisibility(View.VISIBLE);
+                    GestorNotificaciones.LanzarNotificacion(this, "Transacción Exitosa", MensajeNotificacion);
+
                     ActualizarTextoSaldo();
                 }
-
             }
-
     );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla_principal);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.POST_NOTIFICATIONS) !=
+                    android.content.pm.PackageManager.PERMISSION_GRANTED) {
+
+                androidx.core.app.ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
         TextoMontoDinero = findViewById(R.id.TextoMontoDinero);
         BotonOcultarSaldo = findViewById(R.id.BotonOcultarSaldo);
+        BotonNotificaciones = findViewById(R.id.BotonNotificaciones);
         BotonAgregarDinero = findViewById(R.id.BotonAgregarDinero);
         BotonRetirarDinero = findViewById(R.id.BotonRetirarDinero);
         BotonVerExtracto = findViewById(R.id.BotonVerExtracto);
+        PuntoRojoIndicador = findViewById(R.id.PuntoRojoIndicador);
 
         BotonOcultarSaldo.setOnClickListener(Vista -> {
             SaldoVisible = !SaldoVisible;
@@ -79,6 +103,13 @@ public class PantallaPrincipal extends AppCompatActivity {
             Intent IrAExtracto = new Intent(this, ExtractoMovimientosActivity.class);
             IrAExtracto.putExtra("LISTA_MOVIMIENTOS", HistorialMovimientos);
             startActivity(IrAExtracto);
+        });
+
+        BotonNotificaciones.setOnClickListener(Vista -> {
+            PuntoRojoIndicador.setVisibility(View.GONE);
+            Intent IrANotificaciones = new Intent(this, NotificacionesActivity.class);
+            IrANotificaciones.putExtra("LISTA_NOTIFICACIONES", HistorialNotificaciones);
+            startActivity(IrANotificaciones);
         });
     }
     private void ActualizarTextoSaldo() {
