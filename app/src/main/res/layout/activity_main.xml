@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Ingreso Seguro"
+        android:text="SAVINGS"
         android:textColor="#2C3E50"
         android:textSize="26sp"
         android:textStyle="bold" />

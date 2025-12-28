@@ -40,15 +40,14 @@
             android:layout_height="110dp"
             app:cardCornerRadius="55dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="#F8F9F9">
+            app:cardBackgroundColor="#1ABC9C">
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="25dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_launcher_foreground"
-                app:tint="#1ABC9C" />
+                android:scaleType="center"
+                android:src="@drawable/ic_launcher_foreground" />
         </androidx.cardview.widget.CardView>
     </FrameLayout>
 

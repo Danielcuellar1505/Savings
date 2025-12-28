@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Referencia o Concepto"
+        android:text="Concepto"
         android:textColor="#7F8C8D"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -78,7 +78,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="#1ABC9C"
-        android:hint="Ej. Ahorro semanal"
+        android:hint="Escriba Concepto"
         android:inputType="textCapSentences"
         android:textColor="@color/black"
         android:textColorHint="#A9A9A9" />
@@ -92,6 +92,7 @@
         android:id="@+id/BotonConfirmarMovimiento"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:textColor="#FFFFFF"
         android:backgroundTint="#1ABC9C"
         android:text="Guardar Movimiento"
         android:textAllCaps="false"
