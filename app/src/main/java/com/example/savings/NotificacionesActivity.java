@@ -21,16 +21,16 @@ public class NotificacionesActivity extends AppCompatActivity {
         BotonRegresarNotif = findViewById(R.id.BotonRegresarNotif);
         RecyclerNotificaciones = findViewById(R.id.RecyclerNotificaciones);
 
-        // Recibir la lista
-        ArrayList<NotificacionModelo> ListaRecibida =
-                (ArrayList<NotificacionModelo>) getIntent().getSerializableExtra("LISTA_NOTIFICACIONES");
-
-        if (ListaRecibida == null) ListaRecibida = new ArrayList<>();
-
-        // Configurar RecyclerView
         RecyclerNotificaciones.setLayoutManager(new LinearLayoutManager(this));
-        MiAdaptador = new AdaptadorNotificaciones(ListaRecibida);
+        MiAdaptador = new AdaptadorNotificaciones(new ArrayList<>());
         RecyclerNotificaciones.setAdapter(MiAdaptador);
+
+        CBaseDatos.obtenerInstancia().cargarNotificaciones(lista -> {
+            if (lista != null) {
+                MiAdaptador = new AdaptadorNotificaciones(lista);
+                RecyclerNotificaciones.setAdapter(MiAdaptador);
+            }
+        });
 
         BotonRegresarNotif.setOnClickListener(v -> finish());
     }

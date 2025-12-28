@@ -55,20 +55,5 @@ public class FormularioMovimientoActivity extends AppCompatActivity {
                 EntradaMonto.setError("Ingrese un monto válido");
             }
         });
-        ConfigurarInterfazDinamica();
-    }
-
-    private void ConfigurarInterfazDinamica() {
-        String[] Categorias;
-
-        if (TipoMovimiento.equals("AGREGAR")) {
-            TextoTituloFormulario.setText("Ingresar Ahorro");
-            BotonConfirmarMovimiento.setBackgroundColor(Color.parseColor("#1ABC9C"));
-            Categorias = new String[]{"Sueldo", "Regalo", "Venta", "Ahorro", "Otros"};
-        } else {
-            TextoTituloFormulario.setText("Retirar Dinero Ahorrado");
-            BotonConfirmarMovimiento.setBackgroundColor(Color.parseColor("#1ABC9C"));
-            Categorias = new String[]{"Comida", "Transporte", "Servicios", "Diversión", "Otros"};
-        }
     }
 }

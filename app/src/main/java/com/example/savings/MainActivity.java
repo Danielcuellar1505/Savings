@@ -1,7 +1,6 @@
 package com.example.savings;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -36,22 +35,23 @@ public class MainActivity extends AppCompatActivity {
 
         ConfigurarBiometria();
 
-        SharedPreferences Preferencias = getSharedPreferences("DatosUsuario", MODE_PRIVATE);
-        String PinGuardado = Preferencias.getString("PIN", "");
+        CBaseDatos.obtenerInstancia().obtenerDatosUsuario((nombreCompleto, pinNube) -> {
+            if (pinNube != null && !pinNube.isEmpty()) {
+                EntradaLoginPin.setVisibility(View.VISIBLE);
+                BotonEntrarConPin.setVisibility(View.VISIBLE);
 
-        if (!PinGuardado.isEmpty()) {
-            EntradaLoginPin.setVisibility(View.VISIBLE);
-            BotonEntrarConPin.setVisibility(View.VISIBLE);
-
-            BotonEntrarConPin.setOnClickListener(v -> {
-                String PinIngresado = EntradaLoginPin.getText().toString();
-                if (PinIngresado.equals(PinGuardado)) {
-                    IrAPantallaPrincipal();
-                } else {
-                    Toast.makeText(this, "PIN Incorrecto", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+                BotonEntrarConPin.setOnClickListener(v -> {
+                    if (EntradaLoginPin.getText().toString().equals(pinNube)) {
+                        IrAPantallaPrincipal();
+                    } else {
+                        Toast.makeText(this, "PIN Incorrecto", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                EntradaLoginPin.setVisibility(View.GONE);
+                BotonEntrarConPin.setVisibility(View.GONE);
+            }
+        });
         AutenticadorBiometrico.authenticate(ConfiguracionPrompt);
 
         BotonHuellaDigital.setOnClickListener(Vista -> {
@@ -61,28 +61,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void ConfigurarBiometria() {
         EjecutorHilos = ContextCompat.getMainExecutor(this);
-        AutenticadorBiometrico = new BiometricPrompt(this, EjecutorHilos, new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-                IrAPantallaPrincipal();
-            }
+        AutenticadorBiometrico = new BiometricPrompt(this, EjecutorHilos,
+                new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        IrAPantallaPrincipal();
+                    }
 
-            @Override
-            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-            }
-        });
+                    @Override
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                    }
+                });
 
         ConfiguracionPrompt = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Ingreso Seguro")
-                .setSubtitle("Use su huella o el PIN configurado")
-                .setNegativeButtonText("Cancelar")
+                .setTitle("Acceso Biométrico")
+                .setSubtitle("Use su huella para ingresar")
+                .setNegativeButtonText("Usar PIN de respaldo")
                 .build();
     }
 
     private void IrAPantallaPrincipal() {
-        Toast.makeText(this, "¡Acceso Concedido!", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, PantallaPrincipal.class);
         startActivity(intent);
         finish();

@@ -1,38 +1,30 @@
 package com.example.savings;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class PantallaPrincipal extends AppCompatActivity {
 
     private TextView TextoMontoDinero;
-    private ImageButton BotonOcultarSaldo;
-    private ImageButton BotonNotificaciones;
-    private ImageButton BotonAjustes;
-    private Button BotonAgregarDinero;
-    private Button BotonRetirarDinero;
-    private Button BotonVerExtracto;
-    private boolean SaldoVisible = true;
-    private double SaldoActual = 0.00;
+    private ImageButton BotonOcultarSaldo, BotonNotificaciones, BotonAjustes;
+    private Button BotonAgregarDinero, BotonRetirarDinero, BotonVerExtracto;
     private View PuntoRojoIndicador;
 
+    private boolean SaldoVisible = true;
+    private double SaldoActual = 0.00;
     private ArrayList<MovimientoModelo> HistorialMovimientos = new ArrayList<>();
     private ArrayList<NotificacionModelo> HistorialNotificaciones = new ArrayList<>();
 
@@ -43,38 +35,34 @@ public class PantallaPrincipal extends AppCompatActivity {
                     double MontoRecibido = Resultado.getData().getDoubleExtra("MONTO", 0.0);
                     String Tipo = Resultado.getData().getStringExtra("TIPO");
                     String Concepto = Resultado.getData().getStringExtra("CONCEPTO");
-                    if ("AGREGAR".equals(Tipo)) {
-                        SaldoActual += MontoRecibido;
-                    } else {
-                        SaldoActual -= MontoRecibido;
+                    if ("RETIRAR".equals(Tipo) && MontoRecibido > SaldoActual) {
+                        Toast.makeText(this, "Saldo insuficiente en la nube", Toast.LENGTH_LONG).show();
+                        return;
                     }
-                    HistorialMovimientos.add(0, new MovimientoModelo(Tipo, Concepto, MontoRecibido, SaldoActual));
 
-                    String FechaHora = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
-                    String MensajeNotificacion = Tipo + " de " + MontoRecibido + " Bs. en fecha " + FechaHora;
-                    HistorialNotificaciones.add(0, new NotificacionModelo(MensajeNotificacion, System.currentTimeMillis()));
-                    PuntoRojoIndicador.setVisibility(View.VISIBLE);
-                    GestorNotificaciones.LanzarNotificacion(this, "Transacción Exitosa", MensajeNotificacion);
+                    double nuevoSaldoCalculado = ("AGREGAR".equals(Tipo))
+                            ? SaldoActual + MontoRecibido
+                            : SaldoActual - MontoRecibido;
+                    MovimientoModelo nuevoMov = new MovimientoModelo(Tipo, Concepto, MontoRecibido, nuevoSaldoCalculado);
 
-                    ActualizarTextoSaldo();
+                    NotificacionModelo nuevaNotif = new NotificacionModelo(Tipo + " de " + MontoRecibido + " Bs.");
+                    CBaseDatos.obtenerInstancia().registrarMovimiento(nuevoMov);
+                    CBaseDatos.obtenerInstancia().registrarNotificacion(nuevaNotif);
+                    CBaseDatos.obtenerInstancia().obtenerDatosUsuario((nombreCompleto, pin) -> {
+                        TextView TextoSaludoUsuario = findViewById(R.id.TextoSaludoUsuario);
+                        TextoSaludoUsuario.setText("Hola, " + nombreCompleto);
+                    });
+
+                    GestorNotificaciones.LanzarNotificacion(this, "Transacción Enviada", "Sincronizando con la nube...");
                 }
             }
     );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        try { com.google.firebase.FirebaseApp.initializeApp(this); } catch (Exception e) {}
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla_principal);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (androidx.core.content.ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.POST_NOTIFICATIONS) !=
-                    android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-                androidx.core.app.ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
-            }
-        }
 
         TextoMontoDinero = findViewById(R.id.TextoMontoDinero);
         BotonOcultarSaldo = findViewById(R.id.BotonOcultarSaldo);
@@ -85,48 +73,60 @@ public class PantallaPrincipal extends AppCompatActivity {
         PuntoRojoIndicador = findViewById(R.id.PuntoRojoIndicador);
         BotonAjustes = findViewById(R.id.BotonAjustes);
 
-        BotonOcultarSaldo.setOnClickListener(Vista -> {
+        CBaseDatos.obtenerInstancia().obtenerSaldoGlobal(saldo -> {
+            this.SaldoActual = (saldo != null) ? saldo : 0.00;
+            ActualizarTextoSaldo();
+        });
+
+        CBaseDatos.obtenerInstancia().cargarMovimientos(lista -> {
+            if (lista != null) {
+                this.HistorialMovimientos = lista;
+            }
+        });
+
+        CBaseDatos.obtenerInstancia().cargarNotificaciones(lista -> {
+            if (lista != null) {
+                this.HistorialNotificaciones = lista;
+                if (!lista.isEmpty()) PuntoRojoIndicador.setVisibility(View.VISIBLE);
+            }
+        });
+
+        BotonOcultarSaldo.setOnClickListener(v -> {
             SaldoVisible = !SaldoVisible;
             ActualizarTextoSaldo();
             BotonOcultarSaldo.setImageResource(SaldoVisible ? R.drawable.ic_visibility_off : R.drawable.ic_visibility_on);
         });
 
-        BotonAgregarDinero.setOnClickListener(Vista -> {
-            Intent IrAFormulario = new Intent(this, FormularioMovimientoActivity.class);
-            IrAFormulario.putExtra("TIPO_MOVIMIENTO", "AGREGAR");
-            LanzadorFormulario.launch(IrAFormulario);
+        BotonAgregarDinero.setOnClickListener(v -> abrirFormulario("AGREGAR"));
+        BotonRetirarDinero.setOnClickListener(v -> abrirFormulario("RETIRAR"));
+
+        BotonVerExtracto.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ExtractoMovimientosActivity.class);
+            intent.putExtra("LISTA_MOVIMIENTOS", HistorialMovimientos);
+            startActivity(intent);
         });
 
-        BotonRetirarDinero.setOnClickListener(Vista -> {
-            Intent IrAFormulario = new Intent(this, FormularioMovimientoActivity.class);
-            IrAFormulario.putExtra("TIPO_MOVIMIENTO", "RETIRAR");
-            LanzadorFormulario.launch(IrAFormulario);
-        });
-
-        BotonVerExtracto.setOnClickListener(Vista -> {
-            Intent IrAExtracto = new Intent(this, ExtractoMovimientosActivity.class);
-            IrAExtracto.putExtra("LISTA_MOVIMIENTOS", HistorialMovimientos);
-            startActivity(IrAExtracto);
-        });
-
-        BotonNotificaciones.setOnClickListener(Vista -> {
+        BotonNotificaciones.setOnClickListener(v -> {
             PuntoRojoIndicador.setVisibility(View.GONE);
-            Intent IrANotificaciones = new Intent(this, NotificacionesActivity.class);
-            IrANotificaciones.putExtra("LISTA_NOTIFICACIONES", HistorialNotificaciones);
-            startActivity(IrANotificaciones);
+            Intent intent = new Intent(this, NotificacionesActivity.class);
+            intent.putExtra("LISTA_NOTIFICACIONES", HistorialNotificaciones);
+            startActivity(intent);
         });
 
-        BotonAjustes.setOnClickListener(v -> {
-            startActivity(new Intent(this, AjustesActivity.class));
-        });
+        BotonAjustes.setOnClickListener(v -> startActivity(new Intent(this, AjustesActivity.class)));
     }
+
+    private void abrirFormulario(String tipo) {
+        Intent intent = new Intent(this, FormularioMovimientoActivity.class);
+        intent.putExtra("TIPO_MOVIMIENTO", tipo);
+        LanzadorFormulario.launch(intent);
+    }
+
     private void ActualizarTextoSaldo() {
-        if (SaldoVisible) {
-            TextoMontoDinero.setText(String.format(Locale.getDefault(), "Bs. %.2f", SaldoActual));
-        } else {
-            TextoMontoDinero.setText("****");
-        }
+        if (SaldoVisible) TextoMontoDinero.setText(String.format(Locale.getDefault(), "Bs. %.2f", SaldoActual));
+        else TextoMontoDinero.setText("****");
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -134,23 +134,15 @@ public class PantallaPrincipal extends AppCompatActivity {
     }
 
     private void ActualizarSaludoPersonalizado() {
-        SharedPreferences Preferencias = getSharedPreferences("DatosUsuario", MODE_PRIVATE);
-        String Nombre = Preferencias.getString("Nombre", "");
-
-        TextView TextoSaludoUsuario = findViewById(R.id.TextoSaludoUsuario);
-
-        Calendar Cal = Calendar.getInstance();
-        int Hora = Cal.get(Calendar.HOUR_OF_DAY);
-        String MomentoDia;
-
-        if (Hora >= 6 && Hora < 12) MomentoDia = "Buenos días";
-        else if (Hora >= 12 && Hora < 19) MomentoDia = "Buenas tardes";
-        else MomentoDia = "Buenas noches";
-
-        if (Nombre.isEmpty()) {
-            TextoSaludoUsuario.setText("¡Bienvenid@!");
-        } else {
-            TextoSaludoUsuario.setText(MomentoDia + ", " + Nombre);
-        }
-    };
+        CBaseDatos.obtenerInstancia().obtenerDatosUsuario((nombreCompleto, pin) -> {
+            TextView TextoSaludoUsuario = findViewById(R.id.TextoSaludoUsuario);
+            if (nombreCompleto == null || nombreCompleto.equals("Invitado")) {
+                TextoSaludoUsuario.setText("¡Bienvenid@!");
+            } else {
+                int Hora = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+                String Momento = (Hora >= 6 && Hora < 12) ? "Buenos días" : (Hora >= 12 && Hora < 19) ? "Buenas tardes" : "Buenas noches";
+                TextoSaludoUsuario.setText(Momento + ", " + nombreCompleto);
+            }
+        });
+    }
 }

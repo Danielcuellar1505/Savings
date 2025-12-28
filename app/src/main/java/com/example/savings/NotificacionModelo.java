@@ -1,16 +1,19 @@
 package com.example.savings;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class NotificacionModelo implements Serializable {
-    private String Mensaje;
-    private long FechaMilis;
+    public String mensaje;
+    public Date fecha_registro;
+    public NotificacionModelo() {}
 
-    public NotificacionModelo(String Mensaje, long FechaMilis) {
-        this.Mensaje = Mensaje;
-        this.FechaMilis = FechaMilis;
+    public NotificacionModelo(String mensaje) {
+        this.mensaje = mensaje;
+        this.fecha_registro = new Date();
     }
-
-    public String obtenerMensaje() { return Mensaje; }
-    public long obtenerFecha() { return FechaMilis; }
+    public String obtenerMensaje() { return mensaje; }
+    public long obtenerFecha() {
+        return (fecha_registro != null) ? fecha_registro.getTime() : 0;
+    }
 }

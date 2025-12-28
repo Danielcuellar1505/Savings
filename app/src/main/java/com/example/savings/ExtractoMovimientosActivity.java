@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,6 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 
 public class ExtractoMovimientosActivity extends AppCompatActivity {
@@ -27,7 +27,8 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
     private ImageButton BotonRegresarExtracto;
     private ImageButton BotonAbrirFiltros;
     private EditText EntradaBusquedaMonto;
-    private ArrayList<MovimientoModelo> ListaRecibida;
+
+    private ArrayList<MovimientoModelo> ListaMaestraNube = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,45 +38,43 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
         BotonRegresarExtracto = findViewById(R.id.BotonRegresarExtracto);
         ListaRecurrenteMovimientos = findViewById(R.id.ListaRecurrenteMovimientos);
         BotonAbrirFiltros = findViewById(R.id.BotonAbrirFiltros);
-        ListaRecibida = (ArrayList<MovimientoModelo>) getIntent().getSerializableExtra("LISTA_MOVIMIENTOS");
-        if (ListaRecibida == null) {
-            ListaRecibida = new ArrayList<>();
-        }
+
         ConfigurarLista();
         ConfigurarBuscador();
-        BotonAbrirFiltros.setOnClickListener(v -> MostrarModalFiltros());
 
-        BotonRegresarExtracto.setOnClickListener(Vista -> {
-            finish();
+        CBaseDatos.obtenerInstancia().cargarMovimientos(lista -> {
+            if (lista != null) {
+                Collections.sort(lista, (m1, m2) -> Long.compare(m2.obtenerFecha(), m1.obtenerFecha()));
+
+                this.ListaMaestraNube = lista;
+                MiAdaptador.ActualizarLista(new ArrayList<>(ListaMaestraNube));
+            }
         });
+
+        BotonAbrirFiltros.setOnClickListener(v -> MostrarModalFiltros());
+        BotonRegresarExtracto.setOnClickListener(Vista -> finish());
     }
 
     private void ConfigurarLista() {
         ListaRecurrenteMovimientos.setLayoutManager(new LinearLayoutManager(this));
-        MiAdaptador = new AdaptadorMovimiento(new ArrayList<>(ListaRecibida));
+        MiAdaptador = new AdaptadorMovimiento(new ArrayList<>());
         ListaRecurrenteMovimientos.setAdapter(MiAdaptador);
     }
 
     private void ConfigurarBuscador() {
         EntradaBusquedaMonto = findViewById(R.id.EntradaBusquedaMonto);
-
         EntradaBusquedaMonto.addTextChangedListener(new android.text.TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence Secuencia, int Inicio, int Conteo, int Despues) {
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence Secuencia, int Inicio, int Antes, int Conteo) {
-                if (MiAdaptador != null) {
-                    MiAdaptador.FiltrarPorMonto(Secuencia.toString());
-                }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (MiAdaptador != null) MiAdaptador.FiltrarPorMonto(s.toString());
             }
-
             @Override
-            public void afterTextChanged(android.text.Editable Editable) {
-            }
+            public void afterTextChanged(android.text.Editable s) {}
         });
     }
+
     private void MostrarModalFiltros() {
         BottomSheetDialog DialogoFiltro = new BottomSheetDialog(this);
         View VistaModal = getLayoutInflater().inflate(R.layout.layout_modal_filtros, null);
@@ -85,9 +84,10 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
         for (String Nombre : FiltrosFijos) {
             Contenedor.addView(CrearBotonFiltroEnModal(Nombre, DialogoFiltro));
         }
-        if (!ListaRecibida.isEmpty()) {
+
+        if (!ListaMaestraNube.isEmpty()) {
             Calendar CalendarioCursor = Calendar.getInstance();
-            CalendarioCursor.setTimeInMillis(ListaRecibida.get(ListaRecibida.size() - 1).obtenerFecha());
+            CalendarioCursor.setTimeInMillis(ListaMaestraNube.get(ListaMaestraNube.size() - 1).obtenerFecha());
             Calendar CalendarioHoy = Calendar.getInstance();
 
             while (CalendarioCursor.before(CalendarioHoy) || EsMismoMes(CalendarioCursor, CalendarioHoy)) {
@@ -110,7 +110,7 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
 
         Boton.setOnClickListener(v -> {
             if (Texto.equals("Todos")) {
-                MiAdaptador.ActualizarLista(new ArrayList<>(ListaRecibida));
+                MiAdaptador.ActualizarLista(new ArrayList<>(ListaMaestraNube));
             } else {
                 FiltrarPorFecha(Texto);
             }
@@ -124,7 +124,7 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
         Calendar CalItem = Calendar.getInstance();
         Calendar CalReferencia = Calendar.getInstance();
 
-        for (MovimientoModelo Item : ListaRecibida) {
+        for (MovimientoModelo Item : ListaMaestraNube) {
             CalItem.setTimeInMillis(Item.obtenerFecha());
 
             if (Criterio.equals("Hoy")) {
@@ -137,9 +137,7 @@ public class ExtractoMovimientosActivity extends AppCompatActivity {
                 if (EsMismoMes(CalItem, CalReferencia)) ListaFiltrada.add(Item);
             } else {
                 String FechaItem = new SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(CalItem.getTime());
-                if (FechaItem.equals(Criterio)) {
-                    ListaFiltrada.add(Item);
-                }
+                if (FechaItem.equals(Criterio)) ListaFiltrada.add(Item);
             }
         }
         MiAdaptador.ActualizarLista(ListaFiltrada);
