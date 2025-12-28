@@ -36,33 +36,36 @@ public class PantallaPrincipal extends AppCompatActivity {
                     String Tipo = Resultado.getData().getStringExtra("TIPO");
                     String Concepto = Resultado.getData().getStringExtra("CONCEPTO");
                     if ("RETIRAR".equals(Tipo) && MontoRecibido > SaldoActual) {
-                        Toast.makeText(this, "Saldo insuficiente en la nube", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Saldo insuficiente", Toast.LENGTH_LONG).show();
                         return;
                     }
-
                     double nuevoSaldoCalculado = ("AGREGAR".equals(Tipo))
                             ? SaldoActual + MontoRecibido
                             : SaldoActual - MontoRecibido;
                     MovimientoModelo nuevoMov = new MovimientoModelo(Tipo, Concepto, MontoRecibido, nuevoSaldoCalculado);
-
-                    NotificacionModelo nuevaNotif = new NotificacionModelo(Tipo + " de " + MontoRecibido + " Bs.");
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                    String fechaFormateada = sdf.format(nuevoMov.fecha_registro);
+                    String mensajeNotif = Tipo + " " + MontoRecibido + " Bs. en fecha " + fechaFormateada;
+                    NotificacionModelo nuevaNotif = new NotificacionModelo(mensajeNotif);
                     CBaseDatos.obtenerInstancia().registrarMovimiento(nuevoMov);
                     CBaseDatos.obtenerInstancia().registrarNotificacion(nuevaNotif);
-                    CBaseDatos.obtenerInstancia().obtenerDatosUsuario((nombreCompleto, pin) -> {
-                        TextView TextoSaludoUsuario = findViewById(R.id.TextoSaludoUsuario);
-                        TextoSaludoUsuario.setText("Hola, " + nombreCompleto);
-                    });
-
-                    GestorNotificaciones.LanzarNotificacion(this, "Transacción Enviada", "Sincronizando con la nube...");
+                    GestorNotificaciones.LanzarNotificacion(this, "Transacción Exitosa",
+                            Tipo + ": " + MontoRecibido + " Bs. en fecha " + fechaFormateada);
                 }
             }
     );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        try { com.google.firebase.FirebaseApp.initializeApp(this); } catch (Exception e) {}
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla_principal);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
 
         TextoMontoDinero = findViewById(R.id.TextoMontoDinero);
         BotonOcultarSaldo = findViewById(R.id.BotonOcultarSaldo);
@@ -79,9 +82,7 @@ public class PantallaPrincipal extends AppCompatActivity {
         });
 
         CBaseDatos.obtenerInstancia().cargarMovimientos(lista -> {
-            if (lista != null) {
-                this.HistorialMovimientos = lista;
-            }
+            if (lista != null) this.HistorialMovimientos = lista;
         });
 
         CBaseDatos.obtenerInstancia().cargarNotificaciones(lista -> {
